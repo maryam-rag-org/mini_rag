@@ -20,3 +20,13 @@ conda create -n mini-rag-app python=3.8
 '''
 conda activate mini-rag-app
 '''
+
+
+- for API use fastapi and uvicorn to run the server in real time as a service
+ 
+- to upload files with python we need python-multipart 
+
+#### install them 
+''' bash
+pip install -r requirements.txt
+'''
