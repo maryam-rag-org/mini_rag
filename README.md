@@ -26,8 +26,13 @@ conda activate mini-rag-app
  
 - to upload files with python we need python-multipart 
 
-#### install them 
-''' bash
+## installation 
+'''bash
 pip install -r requirements.txt
 '''
+### setup the environment variables
+'''bash
+cp .env.example .env
+'''
 
+#### change this values in .env:
