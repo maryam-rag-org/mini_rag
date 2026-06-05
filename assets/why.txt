@@ -1,0 +1,4 @@
+we use the folder to keep everything we want a way from github
+exept .gitkeep
+
+it is like file .gitignore but as folder

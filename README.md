@@ -30,3 +30,4 @@ conda activate mini-rag-app
 ''' bash
 pip install -r requirements.txt
 '''
+
