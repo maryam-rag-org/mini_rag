@@ -1,7 +1,11 @@
 from fastapi import FastAPI
+from dotenv import load_dotenv
+
+load_dotenv(".env")  # ".env" is the default filename for environment variables
+
+# all the routers files will see thr .env file and can access the environment variables defined in it
+from routers.base import base_router
 
 app = FastAPI()
 
-@app.get("/hello")
-def welcome_message():
-    return {"message": "Welcome to the Mini RAG App!"}
+app.include_router(base_router)
