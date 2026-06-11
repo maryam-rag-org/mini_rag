@@ -14,13 +14,13 @@ This is a mini  impelementaion of the rag
 
 3) create new environment using the following command:
 ```bash
-conda create -n mini-rag-app python=3.8
+conda create -n mini-rag python=3.8
 ```
 
 
 4) Activate the environment:
 ```bash
-conda activate mini-rag-app
+conda activate mini-rag
 ```
 
 
