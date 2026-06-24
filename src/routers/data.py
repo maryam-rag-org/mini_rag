@@ -8,7 +8,12 @@ from controllers import DataController, ProjectController, ProcessController
 from models import ResponseSignal
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
-from models.db_schemes import DataChunk
+from models.AssetModel import AssetModel
+
+
+from models.db_schemes import DataChunk, Asset
+
+from models.enums.AssetTypeEnum import AssetTypeEnum
 
 from .schemes.data import ProcessRequest
 
@@ -70,12 +75,27 @@ async def upload_data(request: Request, # get all the info about the app in the 
             ) 
 
 
-        # upload file to the project directory
-        
+        # store the asset to the DB
+
+        asset_model = await AssetModel.create_instance(
+             db_client=request.app.db_client
+        )
+
+        asset_resource = Asset(
+             asset_project_id= project.id,
+             asset_type= AssetTypeEnum.FILE.value,
+             asset_name= file_id,
+             asset_size= os.path.getsize(file_path)
+
+        )
+
+        asset_record = await asset_model.create_asset(asset=asset_resource)
+
+
         return JSONResponse(
                 content = {
                     "signal": ResponseSignal.FILE_UPLOADED_SUCCESSFULLY.value,
-                    "file_id": file_id
+                    "file_id": str(asset_record.id),
                     }
             ) 
 
