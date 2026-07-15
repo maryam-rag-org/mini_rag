@@ -9,3 +9,4 @@ pyMuPDF==1.27.2.3
 langchain-community==0.4.2
 motor==3.4.0
 openai==1.35.13
+cohere==5.5.8
