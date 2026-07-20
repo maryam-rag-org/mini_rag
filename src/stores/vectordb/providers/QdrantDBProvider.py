@@ -7,21 +7,21 @@ from typing import List
 
 class QdrantDBProvider(VectorDBInterface):
     
-    def __init__(self, db_path: str,
-                 distance_method: str):
-        
-        self.client = None
-        self.db_path = db_path
-        self.distance_method = None
+        def __init__(self, db_path: str,
+                    distance_method: str):
+            
+            self.client = None
+            self.db_path = db_path
+            self.distance_method = None
 
-        if distance_method == DistanceMethodEnums.COSINE.value:
-            self.distance_method = models.Distance.COSINE
+            if distance_method == DistanceMethodEnums.COSINE.value:
+                self.distance_method = models.Distance.COSINE
 
-        elif distance_method == DistanceMethodEnums.DOT.value:
-            self.distance_method = models.Distance.DOT
-        
+            elif distance_method == DistanceMethodEnums.DOT.value:
+                self.distance_method = models.Distance.DOT
+            
 
-        self.logger = logging.getLogger(__name__)
+            self.logger = logging.getLogger(__name__)
 
         def connect(self):
             self.client = QdrantClient(path=self.db_path)
@@ -40,10 +40,10 @@ class QdrantDBProvider(VectorDBInterface):
         def get_collection_info(self, collection_name: str) -> dict:
             return self.client.get_collection(collection_name = collection_name)
         
-        def delete_collection(self, collection_naem: str):
+        def delete_collection(self, collection_name: str):
             # validation 
-            if self.is_collection_existed(collection_naem):
-                return self.client.delete_collection(collection_naem = collection_naem)
+            if self.is_collection_existed(collection_name):
+                return self.client.delete_collection(collection_name = collection_name)
         
         def create_collection(self, collection_name: str,
                                 embedding_size: int,
@@ -52,7 +52,7 @@ class QdrantDBProvider(VectorDBInterface):
             if do_reset:
                _ = self.delete_collection(collection_name=collection_name)
             
-            if not is_collection_existed(collection_name=collection_name):
+            if not self.is_collection_existed(collection_name=collection_name):
                 _ = self.client.create_collection(
                     collection_name = collection_name,
                     vectors_config = models.VectorParams(
@@ -70,7 +70,7 @@ class QdrantDBProvider(VectorDBInterface):
                          metadata: dict = None,
                          record_id: str = None):
             
-            if not is_collection_existed(collection_name=collection_name):
+            if not self.is_collection_existed(collection_name=collection_name):
                 self.logger.error(f"Can not insert new record to non-existed collection: {collection_name}")
                 return False
             
@@ -79,6 +79,7 @@ class QdrantDBProvider(VectorDBInterface):
                     collection_name = collection_name,
                     records = [
                         models.Record(
+                            id = [record_id],
                             vector=vector,
                             payload={
                                 "text": text,
@@ -105,7 +106,7 @@ class QdrantDBProvider(VectorDBInterface):
                 metadata = [None] * len(texts)
 
             if record_ids is None:
-                record_ids = [None] * len(texts)
+                record_ids = list(range(0, len(texts)))
 
             
             for i in range(0, len(texts), batch_size):
@@ -113,10 +114,12 @@ class QdrantDBProvider(VectorDBInterface):
                 batch_text = texts[i:batch_end]
                 batch_vectors = vectors[i:batch_end]
                 batch_metadata = metadata[i:batch_end]
+                batch_record_ids = record_ids[i:batch_end]
 
 
                 batch_records = [
                     models.Record(
+                        id = batch_record_ids[j],
                         vector=batch_vectors[j],
                         payload={
                             "text": batch_text[j],
@@ -137,13 +140,13 @@ class QdrantDBProvider(VectorDBInterface):
                 
                 return True
             
-            def search_by_vector(self, collection_name: str,
+        def search_by_vector(self, collection_name: str,
                                vector: list, 
                                limit: int = 5):
                 
-                return self.client.search(
+            return self.client.search(
                     collection_name=collection_name,
-                    querry_vector= vector,
+                    query_vector= vector,
                     limit=limit
                 )
 

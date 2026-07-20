@@ -4,7 +4,7 @@ from enum import Enum
 class LLMEnums(Enum):
 
     Qwen = "QWEN"
-    COHERE = "COHERE"
+    CoHere = "COHERE"
 
 class QwenEnums(Enum):
 

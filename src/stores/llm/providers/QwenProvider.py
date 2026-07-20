@@ -1,5 +1,5 @@
 from ..LLMInterface import LLMInterface
-from ..LLMEnums import QwenAIEnums
+from ..LLMEnums import QwenEnums
 from openai import OpenAI
 import logging
 
@@ -63,7 +63,7 @@ class QwenProvider(LLMInterface):
 
         #########################
 
-        chat_history.append( self.construct_prompt(prompt=prompt, role=QwenAIEnums.USER.value) )
+        chat_history.append( self.construct_prompt(prompt=prompt, role=QwenEnums.USER.value) )
 
         response = self.client.chat.completions.create(
             model= self.generation_model_id,

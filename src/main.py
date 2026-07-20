@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 # all the routers files will see thr .env file and can access the environment variables defined in it
-from routers.base import base_router
-from routers.data import data_router
-
+from routes.base import base_router
+from routes.data import data_router
+from routes.nlp import nlp_router
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
 
@@ -38,10 +38,12 @@ async def shutdown_span():
     app.vectordb_client.disconnect()
 
 
-app.router.lifespan.on_startup.append(startup_span)
-app.router.lifespan.on_shutdown.append(shutdown_span)
+#app.router.lifespan.on_startup.append(startup_span)
+#app.router.lifespan.on_shutdown.append(shutdown_span)
 
+app.on_event("startup")(startup_span)
+app.on_event("shutdown")(shutdown_span)
 
 app.include_router(base_router)
 app.include_router(data_router)
-
+app.include_router(nlp_router)

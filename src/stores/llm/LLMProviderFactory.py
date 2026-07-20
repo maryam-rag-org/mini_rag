@@ -1,5 +1,5 @@
 
-from .LLMEnums import LLMEums
+from .LLMEnums import LLMEnums
 from .providers import QwenProvider, CoHereProvider
 
 
@@ -10,7 +10,7 @@ class LLMProviderFactory:
         self.config = config
 
     def create(self, provider: str):
-        if provider == LLMEums.Qwen.value:
+        if provider == LLMEnums.Qwen.value:
             return QwenProvider(
                 api_key= self.config.QWEN_API_KEY,
                 base_url=self.config.QWEN_API_URL,
@@ -19,7 +19,7 @@ class LLMProviderFactory:
                 default_generation_temperature=self.config.GENERATION_DEFAULT_TEMPERATURE
             )
         
-        elif provider == LLMEums.CoHere.value:
+        elif provider == LLMEnums.CoHere.value:
             return CoHereProvider(
                 api_key= self.config.COHERE_API_KEY,
                 default_input_max_characters=self.config.INPUT_DEFAULT_MAX_CHARACTERS,
