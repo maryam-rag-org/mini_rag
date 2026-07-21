@@ -9,7 +9,7 @@ class LLMEnums(Enum):
 class QwenEnums(Enum):
 
     SYSTEM = "system"
-    USER = "usre"
+    USER = "user"
     ASSISTANT = "assistant"
 
 class CoHereEnums(Enum):

@@ -23,9 +23,11 @@ class QwenProvider(LLMInterface):
         self.embedding_model_id = None
         self.embedding_size = None 
 
+        self.enums = QwenEnums
+
         self.client = OpenAI(
             api_key = self.api_key,
-            base_url = self.base_url
+            base_url = self.base_url if self.base_url and len(self.base_url) else None
         )
  
         self.logger = logging.getLogger(__name__)
@@ -54,9 +56,9 @@ class QwenProvider(LLMInterface):
             self.logger.error("Qwen client was not set")
             return None 
         
-        if not self.embedding_model_id:
+        if not self.generation_model_id:
             self.logger.error("Generation model for Qwen was not set")
-            return None 
+            return None   
         
         max_output_tokens = max_output_tokens if max_output_tokens else self.default_generation_max_output_tokens
         temperature = temperature if temperature else self.default_generation_temperature
@@ -78,7 +80,7 @@ class QwenProvider(LLMInterface):
             return None
         
 
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content
 
 
 
