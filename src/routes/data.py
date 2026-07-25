@@ -33,7 +33,7 @@ data_router = APIRouter(
 # upload pdf
 @data_router.post("/upload/{project_id}")
 async def upload_data(request: Request, # get all the info about the app in the main router 
-                      project_id: str, 
+                      project_id: int, 
                       file: UploadFile,
                       app_settings: Settings = Depends(get_settings)):
 
@@ -82,7 +82,7 @@ async def upload_data(request: Request, # get all the info about the app in the 
         )
 
         asset_resource = Asset(
-             asset_project_id= project.id,
+             asset_project_id= project.project_id,
              asset_type= AssetTypeEnum.FILE.value,
              asset_name= file_id,
              asset_size= os.path.getsize(file_path)
@@ -95,14 +95,14 @@ async def upload_data(request: Request, # get all the info about the app in the 
         return JSONResponse(
                 content = {
                     "signal": ResponseSignal.FILE_UPLOADED_SUCCESSFULLY.value,
-                    "file_id": str(asset_record.id),
+                    "file_id": str(asset_record.asset_id),
                     }
             ) 
 
 
 @data_router.post("/process/{project_id}")
 async def process_endpoint(request: Request, 
-                           project_id: str, 
+                           project_id: int, 
                            process_request: ProcessRequest):
     
     
@@ -126,7 +126,7 @@ async def process_endpoint(request: Request,
 
     if process_request.file_id:
         asset_record = await asset_model.get_asset_record(
-              asset_project_id=project.id,
+              asset_project_id=project.project_id,
               asset_name=process_request.file_id
          )
 
@@ -139,20 +139,20 @@ async def process_endpoint(request: Request,
          )
               
         project_file_ids = {
-             asset_record.id:asset_record.asset_name
+             asset_record.asset_id:asset_record.asset_name
              }
 
     else:
         
          
         project_file = await asset_model.get_all_project_assets(
-             asset_project_id = project.id,
+             asset_project_id = project.project_id,
              asset_type = AssetTypeEnum.FILE.value
              )
         
         project_file_ids = {
              
-            record.id:record.asset_name 
+            record.asset_project_id:record.asset_name 
              for record in project_file
         }
 
@@ -173,7 +173,7 @@ async def process_endpoint(request: Request,
 
     if do_reset == 1:
             _ = await chunk_model.delete_chunks_by_project_id(
-                project_id=project.id
+                project_id=project.project_id
                 )
 
     num_records = 0
@@ -210,7 +210,7 @@ async def process_endpoint(request: Request,
                 chunk_text= chunk.page_content,
                 chunk_metadata=chunk.metadata,
                 chunk_order = i+1,
-                chunk_project_id =  project.id,
+                chunk_project_id =  project.project_id,
                 chunk_asset_id = asset_id
 
             )
