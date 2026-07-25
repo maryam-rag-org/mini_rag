@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ```
 ### setup the environment variables
 ```bash
-cp .env.example .env
+cp .env.example .env 
 ```
 
 #### change this values in .env:
