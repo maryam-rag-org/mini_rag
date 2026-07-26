@@ -30,7 +30,7 @@ class Asset(SQLAlchemyBase):
 
     # relationship between asset and project
     project = relationship("Project", back_populates="assets")
-
+    chunks = relationship("DataChunk", back_populates="asset")
 
     # Indexing
     __table_args__ = (

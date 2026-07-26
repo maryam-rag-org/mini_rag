@@ -94,7 +94,7 @@ async def upload_data(request: Request, # get all the info about the app in the 
 
         return JSONResponse(
                 content = {
-                    "signal": ResponseSignal.FILE_UPLOADED_SUCCESSFULLY.value,
+                    "signal": ResponseSignal.FILE_UPLOAD_SUCCESS.value,
                     "file_id": str(asset_record.asset_id),
                     }
             ) 
@@ -152,7 +152,7 @@ async def process_endpoint(request: Request,
         
         project_file_ids = {
              
-            record.asset_project_id:record.asset_name 
+            record.asset_id:record.asset_name 
              for record in project_file
         }
 
@@ -224,7 +224,7 @@ async def process_endpoint(request: Request,
 
     return JSONResponse(
          content={
-              "signal": ResponseSignal.PROCESSING_SUCCESSFUL.value,
+              "signal": ResponseSignal.PROCESSING_SUCCESS.value,
               "inserted_chuncks": num_records,
               "processed_files": num_files
          }

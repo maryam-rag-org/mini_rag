@@ -1,3 +1,3 @@
-from minirag.schemes import Project
-from minirag.schemes import Asset
-from minirag.schemes import DataChunk, RetrievedDocument   
+from models.db_schemes.minirag.schemes import Project
+from models.db_schemes.minirag.schemes import Asset
+from models.db_schemes.minirag.schemes import DataChunk, RetrievedDocument   
