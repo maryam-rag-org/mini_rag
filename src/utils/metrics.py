@@ -7,7 +7,7 @@ import time
 
 
 # Define metrics
-REQUEST_COUNT = Counter('http_requests_total', 'Tottal HTTP Requests', ['method', 'endpint', 'status'])
+REQUEST_COUNT = Counter('http_requests_total', 'Total HTTP Requests', ['method', 'endpoint', 'status'])
 REQUEST_LATENCY = Histogram('http_request_duration_seconds', 'HTTP Request Latency', ['method', 'endpoint'])
 
 class PrometheusMiddleware(BaseHTTPMiddleware):
@@ -20,9 +20,10 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         
         endpoint = request.url.path
 
+        
         REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(duration)
         REQUEST_COUNT.labels(method=request.method, endpoint=endpoint, status=response.status_code).inc()
-        
+
         return response
     
 def setup_metrics(app: FastAPI):

@@ -1,4 +1,5 @@
 from sqlalchemy import text as sql_text
+from sqlalchemy.exc import IntegrityError
 
 from ..VectorDBInterface import VectorDBInterface
 from ..VectorDBEnums import (PgVectorDistanceMethodEnums, PgVectorTableSchemeEnums,
@@ -45,12 +46,16 @@ class PGVectorProvider(VectorDBInterface):
     async def connect(self):
             async with self.db_client() as session:
                 async with session.begin():
-                    await session.execute(
-                            sql_text(
-                                    "CREATE EXTENSION IF NOT EXISTS vector"
-                              )
-                        )
-                    await session.commit()
+                    try:
+                        await session.execute(
+                                sql_text(
+                                        "CREATE EXTENSION IF NOT EXISTS vector"
+                                  )
+                            )
+                        await session.commit()
+                    except IntegrityError:
+                        # Another worker process created the extension concurrently
+                        await session.rollback()
 
     async def disconnect(self):
             pass
