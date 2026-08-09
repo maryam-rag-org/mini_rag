@@ -8,7 +8,7 @@ FILE_DEFAULT_CHUNK_SIZE = 512000 #0.5 MB
 
 POSTGRES_USERNAME = "postgres"
 POSTGRES_PASSWORD = "admin"
-POSTGRES_HOST = "localhost"
+POSTGRES_HOST = "pgvector" # name of docker image that host postgres
 POSTGRES_PORT = 5432
 POSTGRES_MAIN_DATABASE = "minirag"
 
