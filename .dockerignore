@@ -1,0 +1,25 @@
+.git
+.gitignore
+
+# Secrets / local env files
+.env
+.env.*
+docker/env/
+
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Local data / uploaded assets
+src/assets/database/
+src/assets/files/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+
+# Docs
+README.md
+LICENSE
+docker/README.md

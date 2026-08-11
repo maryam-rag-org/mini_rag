@@ -1,6 +1,8 @@
 from ..LLMInterface import LLMInterface
 from ..LLMEnums import QwenEnums
 from openai import OpenAI
+
+from typing import List, Union
 import logging
 
 
@@ -85,7 +87,7 @@ class QwenProvider(LLMInterface):
 
 
         
-    def embed_text(self, text:str, document_type:str = None):
+    def embed_text(self, text:Union[str, List[str]], document_type:str = None):
         
         
         ###### Validation ######
@@ -96,6 +98,9 @@ class QwenProvider(LLMInterface):
         if not self.embedding_model_id:
             self.logger.error("Embedding model for Qwen was not set")
             return None 
+        
+        if isinstance(text, str):
+            text = [text]
         
         #########################
 
@@ -110,14 +115,14 @@ class QwenProvider(LLMInterface):
             return None
         
 
-        return response.data[0].embedding
+        return [record.embedding for record in response.data]
 
 
     def construct_prompt(self, prompt:str, role:str):  
         
         return {
             "role": role,
-            "content": self.process_text(prompt)
+            "content": prompt
         }
 
 
