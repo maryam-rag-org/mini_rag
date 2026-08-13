@@ -3,7 +3,7 @@ from helpers.config import get_settings, Settings
 
 import os
 
-from datatime import datatime
+from datetime import datetime
 
 base_router = APIRouter(
     prefix="/api/v1",
@@ -24,5 +24,5 @@ async def welcome_message(app_settings: Settings = Depends(get_settings)):
     return {
         "app_name": app_name,
         "app_version": app_version,
-        "datatime": datatime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "datatime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
