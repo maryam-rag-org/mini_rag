@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     PRIMARY_LANG:str = "en"
     DEFAULT_LANG: str = "en"
 
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
+    CELERY_TASK_SERIALIZER: str = "Json"
+    CELERY_TASK_TIME_LIMIT: int = 600
+    CELERY_TASK_ACKS_LATE: bool = True
+    CELERY_WORKER_CONCURRENCY: int = 2
+    CELERY_FLOWER_PASSWORD: str
+
+
     class Config:
         env_file = ".env"
 
