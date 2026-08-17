@@ -18,7 +18,7 @@ from models.enums.AssetTypeEnum import AssetTypeEnum
 from .schemes.data import ProcessRequest
 
 from tasks.file_processing import process_project_file
-
+from tasks.process_workflow import process_and_push_workflow
 import os
 import aiofiles
 import logging
@@ -123,6 +123,32 @@ async def process_endpoint(request: Request,
         content={
             "signal": ResponseSignal.PROCESSING_SUCCESS.value,
             "task_id": task.id
+        }
+    )
+    
+
+@data_router.post("/process_and_push/{project_id}")
+async def process_and_push_endpoint(request: Request, 
+                           project_id: int, 
+                           process_request: ProcessRequest):
+    
+    
+    chunk_size = process_request.chunk_size
+    overlap_size = process_request.overlap_size
+    do_reset = process_request.do_reset
+
+    woekflow_task = process_and_push_workflow.delay(project_id=project_id,
+                                      file_id=process_request.file_id,
+                                      chunk_size=chunk_size,
+                                      overlap_size=overlap_size,
+                                      do_reset=do_reset)
+
+
+
+    return JSONResponse(
+        content={
+            "signal": ResponseSignal.PROCESS_AND_PUSH_WORKFLOW_READY.value,
+            "woekflow_task_id": woekflow_task.id
         }
     )
     

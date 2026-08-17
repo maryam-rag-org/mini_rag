@@ -15,7 +15,6 @@ from models.enums.AssetTypeEnum import AssetTypeEnum
 
 
 import asyncio
-import json
 
 import logging
 
@@ -185,7 +184,9 @@ async def _process_project_file(task_instance, project_id: int,
         return {
                 "signal": ResponseSignal.PROCESSING_SUCCESS.value,
                 "inserted_chuncks": num_records,
-                "processed_files": num_files
+                "processed_files": num_files,
+                "project_id": project_id,
+                "do_reset": do_reset 
             }
         
 
