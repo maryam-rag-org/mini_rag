@@ -114,7 +114,7 @@ async def process_endpoint(request: Request,
     task = process_project_file.delay(project_id=project_id,
                                       file_id=process_request.file_id,
                                       chunk_size=chunk_size,
-                                      overlap=overlap,
+                                      overlap_size=overlap,
                                       do_reset=do_reset)
 
 
