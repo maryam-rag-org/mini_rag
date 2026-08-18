@@ -1,0 +1,36 @@
+from .minirag_base import SQLAlchemyBase
+from sqlalchemy import Column, Integer, DateTime, String ,func, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.orm import relationship
+from sqlalchemy import Index
+
+import uuid
+
+class CeleryTaskExecution(SQLAlchemyBase):
+
+    __tablename__ = "celery_task_executions"
+
+    execution_id = Column(Integer, primary_key=True, autoincrement=True)
+
+    task_name = Column(String(225), nullable=False)
+    task_args_hash = Column(String(64), nullable=False) # using SHA-256 ==> نعمل hash ==> لحتى نشوف اذا في تنين متل بعض 
+    celery_task_id = Column(UUID(as_uuid=True), nullable=True)
+
+    status = Column(String(29), nullable=False, default="PENDING")
+
+    task_args = Column(JSONB, nullable=True)
+    result = Column(JSONB, nullable=True)
+
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now() ,nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now() ,nullable=True)
+
+
+    __table_args__ = (
+        Index('ix_task_name_args_hash', task_name, task_args_hash, unique=True),
+        Index('ix_task_execution_status', status),
+        Index('ix_task_execution_created_at', created_at),
+        Index('ix_celery_task_id', celery_task_id),
+    )
+
