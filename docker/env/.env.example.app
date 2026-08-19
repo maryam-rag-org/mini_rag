@@ -48,3 +48,11 @@ PRIMARY_LANG = "en"
 DEFAULT_LANG = "en"
 
 
+# ==================== Celery Task Queue Config ====================
+CELERY_BROKER_URL="amqp://minirag_user:Password@rabbitmq:5672/minirag_vhost"
+CELERY_RESULT_BACKEND="redis://:Password@redis:6379/0"
+CELERY_TASK_SERIALIZER="json"
+CELERY_TASK_TIME_LIMIT=600
+CELERY_TASK_ACKS_LATE=true
+CELERY_WORKER_CONCURRENCY=2
+CELERY_FLOWER_PASSWORD=
