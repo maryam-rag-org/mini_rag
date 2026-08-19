@@ -1,64 +1,119 @@
-# Build mini_rag 
+# mini-rag
 
-This is a mini  impelementaion of the rag
+This is a minimal implementation of the RAG model for question answering.
+
 
 ## Requirements
 
-- python 3.8 or later
+- Python 3.10
 
-#### Install python using MiniConda On mac
+#### Install Dependencies
 
-1) curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
-
-2) bash Miniconda3-latest-MacOSX-arm64.sh
-
-3) create new environment using the following command:
 ```bash
-conda create -n mini-rag python=3.8
+sudo apt update
+sudo apt install libpq-dev gcc python3-dev
+```
+
+#### Install Python using MiniConda
+
+1) Download and install MiniConda from [here](https://docs.anaconda.com/free/miniconda/#quick-command-line-install)
+2) Create a new environment using the following command:
+```bash
+$ conda create -n mini-rag python=3.10
+```
+3) Activate the environment:
+```bash
+$ conda activate mini-rag
 ```
 
 
-4) Activate the environment:
+
+### (Optional) Run Ollama Local LLM Server using Colab + Ngrok
+
+- Check the [notebook](https://colab.research.google.com/drive/1KNi3-9KtP-k-93T3wRcmRe37mRmGhL9p?usp=sharing) + [Video](https://youtu.be/-epZ1hAAtrs)
+
+## Installation
+
+### Install the required packages
+
 ```bash
-conda activate mini-rag
+$ pip install -r requirements.txt
+```
+
+### Setup the environment variables
+
+```bash
+$ cp .env.example .env
+```
+
+### Run Alembic Migration
+
+```bash
+$ alembic upgrade head
+```
+
+Set your environment variables in the `.env` file. Like `OPENAI_API_KEY` value.
+
+## Run Docker Compose Services
+
+```bash
+$ cd docker
+$ cp .env.example .env
+```
+
+- update `.env` with your credentials
+
+
+
+```bash
+$ cd docker
+$ sudo docker compose up -d
+```
+
+## Access Services
+
+- **FastAPI**: http://localhost:8080
+- **Flower Dashboard**: http://localhost:5555 (admin/password from env)
+- **Grafana**: http://localhost:3000
+- **Prometheus**: http://localhost:9090
+
+## Run the FastAPI server (Development Mode)
+
+```bash
+$ uvicorn main:app --reload --host 0.0.0.0 --port 5000
+```
+
+# Celery (Development Mode)
+
+For development, you can run Celery services manually instead of using Docker:
+
+To Run the **Celery worker**, you need to run the following command in a separate terminal:
+
+```bash
+$ cd src
+```
+
+```bash
+$ python -m celery -A celery_app worker --queues=default,file_processing,data_indexing --loglevel=info
+```
+
+To run the **Beat scheduler**, you can run the following command in a separate terminal:
+
+```bash
+$ python -m celery -A celery_app beat --loglevel=info
+```
+
+To Run **Flower Dashboard**, you can run the following command in a separate terminal:
+
+```bash
+$ python -m celery -A celery_app flower --conf=flowerconfig.py
 ```
 
 
-- for API use fastapi and uvicorn to run the server in real time as a service
- 
-- to upload files with python we need python-multipart 
+open your browser and go to `http://localhost:5555` to see the dashboard.
 
-## installation 
-```bash
-pip install -r requirements.txt
-```
-### setup the environment variables
-```bash
-cp .env.example .env 
-```
+## POSTMAN Collection
 
-#### change this values in .env:
+Download the POSTMAN collection from [/assets/mini-rag-app.postman_collection.json](/assets/mini-rag-app.postman_collection.json)
 
 
-## To Run the FastAPIb Server
-
-```bash
-uvicorn main:app
-```
-
-Or with options:
-
-| Flag | Description |
-|------|-------------|
-| `--reload` | Auto-restart on code changes (development only) |
-| `--host 0.0.0.0` | Make the API accessible to other devices |
-| `--port 8000` | Set the port number |
-
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### You can see the postman collection on 
-```bash
-assets/mini-rag-app.postman_collection.json
-```
