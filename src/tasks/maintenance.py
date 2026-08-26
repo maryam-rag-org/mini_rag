@@ -10,16 +10,16 @@ from utils.idempotency_manager import IdempotencyManager
 logger = logging.getLogger(__name__)
 
 @celery_app.task(
-        bind=True, name="tasks.maintenance.clean_celery_executins_table",
+        bind=True, name="tasks.maintenance.clean_celery_executions_table",
         autoretry_for = (Exception,),
         retry_kwargs={'max_retries': 3, 'countdown': 60}
 )
 def clean_celery_executins_table(self):
 
-    return asyncio.run(_clean_celery_executins_table(self))
+    return asyncio.run(_clean_celery_executions_table(self))
 
 
-async def _clean_celery_executins_table(task_instance):
+async def _clean_celery_executions_table(task_instance):
 
     db_engine, vectordb_client = None, None
         
