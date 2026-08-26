@@ -19,7 +19,7 @@ class VectorDBProviderFactory:
             
             return QdrantDBProvider(
                 db_client=qdrant_db_client,
-                distance_method=self.config.VECTOR_DB_DISTANCE_MITHOD,
+                distance_method=self.config.VECTOR_DB_DISTANCE_METHOD,
                 # for now we do not need this just to make all providers the same
                 default_vector_size= self.config.EMBEDDING_MODEL_SIZE,
                 index_threshold= self.config.VECTOR_DB_PGVEC_INDEX_THRESHOLD,
@@ -29,7 +29,7 @@ class VectorDBProviderFactory:
         if provider == VectorDBEnums.PGVECTOR.value:
             return PGVectorProvider(
                 db_client=self.db_client,
-                distance_method=  self.config.VECTOR_DB_DISTANCE_MITHOD,
+                distance_method=  self.config.VECTOR_DB_DISTANCE_METHOD,
                 default_vector_size= self.config.EMBEDDING_MODEL_SIZE,
                 index_threshold= self.config.VECTOR_DB_PGVEC_INDEX_THRESHOLD,
             )
