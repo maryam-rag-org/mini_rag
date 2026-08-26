@@ -34,13 +34,13 @@ jobs:
                 echo "Port 80 is now active."
                 break
               else
-                echo "Port 80 notb ready yet. Retrying in 5 seconds."
+                echo "Port 80 not ready yet. Retrying in 5 seconds."
                 sleep 5
               fi
             done
 
             if ! ss -tunl | grep -q ':80'; then
-              echo "Service failed to start on port 8001"
+              echo "Service failed to start on port 8000"
               exit 1
             fi
 
