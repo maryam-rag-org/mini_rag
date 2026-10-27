@@ -56,24 +56,22 @@ class IdempotencyManager:
             await session.close()
 
     async def get_existing_task(self, task_name: str, 
-                                task_args: dict, celery_task_id: str) -> CeleryTaskExecution:
-        """Check if task with same name and args already exists."""
+                                task_args: dict) -> CeleryTaskExecution:
+        """Check if task with same name and args already exists (any celery task id)."""
         args_hash = self.create_args_hash(task_name, task_args)
         
         session = self.db_client()
         try:
             stmt = select(CeleryTaskExecution).where(
-                CeleryTaskExecution.celery_task_id == celery_task_id,
                 CeleryTaskExecution.task_name == task_name,
                 CeleryTaskExecution.task_args_hash == args_hash
-            )
+            ).order_by(CeleryTaskExecution.created_at.desc()).limit(1)
             result = await session.execute(stmt)
             return result.scalar_one_or_none()
         finally:
             await session.close()
 
     async def should_execute_task(self, task_name: str, task_args: dict,
-                                  celery_task_id: str, 
                                   task_time_limit: int = 600) -> tuple[bool, CeleryTaskExecution]:
         """
         Check if task should be executed or return existing result.
@@ -81,7 +79,7 @@ class IdempotencyManager:
             task_time_limit: Time limit in seconds after which a stuck task can be re-executed
         Returns (should_execute, existing_task_or_none)
         """
-        existing_task = await self.get_existing_task(task_name, task_args, celery_task_id)
+        existing_task = await self.get_existing_task(task_name, task_args)
         
         if not existing_task:
             return True, None

@@ -38,6 +38,7 @@ async def _process_project_file(task_instance, project_id: int,
 
     
     db_engine, vectordb_client = None, None
+    idempotency_manager, task_record = None, None
     
     try:
 
@@ -66,7 +67,6 @@ async def _process_project_file(task_instance, project_id: int,
         should_execute, existing_task = await idempotency_manager.should_execute_task(
             task_name=task_name,
             task_args=task_args,
-            celery_task_id=task_instance.request.id,
             task_time_limit=settings.CELERY_TASK_TIME_LIMIT
         )
 
@@ -235,24 +235,32 @@ async def _process_project_file(task_instance, project_id: int,
             }
         )
 
-        await idempotency_manager.update_task_status(
-            execution_id=task_record.execution_id,
-            status='SUCCESS',
-            result={"signal": ResponseSignal.PROCESSING_SUCCESS.value}
-        )
-
-        logger.warning(f"inserted_chunks: {no_records}")
-
-        return {
+        task_result = {
                     "signal": ResponseSignal.PROCESSING_SUCCESS.value,
                     "inserted_chunks": no_records,
                     "processed_files": no_files,
                     "project_id": project_id,
                     "do_reset": do_reset
                 }
+
+        await idempotency_manager.update_task_status(
+            execution_id=task_record.execution_id,
+            status='SUCCESS',
+            result=task_result
+        )
+
+        logger.warning(f"inserted_chunks: {no_records}")
+
+        return task_result
     
     except Exception as e:
         logger.error(f"Task failed: {str(e)}")
+        # without this the record stays STARTED and the retry is skipped as "still running"
+        if task_record:
+            await idempotency_manager.update_task_status(
+                execution_id=task_record.execution_id,
+                status='FAILURE'
+            )
         raise
     finally:
         try:

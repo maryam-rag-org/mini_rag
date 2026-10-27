@@ -103,7 +103,7 @@ services:
     ports:
       - "5400:5432" # local_port_OR_server_port:main_port   
     volumes: # storeg for DB
-      - 'pgvector:/var/lib/postgresql/ data'
+      - 'pgvector:/var/lib/postgresql/data'
     env_file:
       - ./env/.env.postgres
     networks:

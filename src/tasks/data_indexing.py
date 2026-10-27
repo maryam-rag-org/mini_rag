@@ -11,6 +11,8 @@ from controllers import NLPController
 
 from tqdm.auto import tqdm
 
+from utils.idempotency_manager import IdempotencyManager
+
 import asyncio
 import json
 
@@ -37,6 +39,7 @@ async def _index_data_content(task_instance, project_id: int ,do_reset: int):
 
 
     db_engine, vectordb_client = None, None
+    idempotency_manager, task_record = None, None
     
     try:
                 (db_engine, db_client, llm_provider_factory, 
@@ -57,7 +60,7 @@ async def _index_data_content(task_instance, project_id: int ,do_reset: int):
                 )
             
                 if not project:
-                    task_instance.update_stste(
+                    task_instance.update_state(
                          state = 'FAILURE',
                          meta={
                               "signal": ResponseSignal.PROJECT_NOT_FOUND_ERROR.value
@@ -73,6 +76,44 @@ async def _index_data_content(task_instance, project_id: int ,do_reset: int):
                     template_parser = template_parser
                 )
             
+                # skip duplicate submissions; chunk count is part of the key so
+                # re-indexing after new files were processed still runs
+                total_chunks_count = await chunk_model.get_total_chunks_count(project_id=project.project_id)
+
+                idempotency_manager = IdempotencyManager(db_client, db_engine)
+                task_name = "tasks.data_indexing.index_data_content"
+                task_args = {
+                    "project_id": project_id,
+                    "do_reset": do_reset,
+                    "total_chunks_count": total_chunks_count,
+                }
+
+                should_execute, existing_task = await idempotency_manager.should_execute_task(
+                    task_name=task_name,
+                    task_args=task_args,
+                    task_time_limit=get_settings().CELERY_TASK_TIME_LIMIT
+                )
+
+                if not should_execute:
+                    logger.warning(f"Can not handle the task | status: {existing_task.status}")
+                    return existing_task.result
+
+                if existing_task:
+                    task_record = existing_task
+                    await idempotency_manager.update_task_status(
+                        execution_id=task_record.execution_id, status='PENDING'
+                    )
+                else:
+                    task_record = await idempotency_manager.create_task_record(
+                        task_name=task_name,
+                        task_args=task_args,
+                        celery_task_id=task_instance.request.id
+                    )
+
+                await idempotency_manager.update_task_status(
+                    execution_id=task_record.execution_id, status='STARTED'
+                )
+
                 has_recordes = True
                 page_no = 1
                 inserted_items_count = 0
@@ -89,8 +130,6 @@ async def _index_data_content(task_instance, project_id: int ,do_reset: int):
                 )
             
                 # setup batching and progress bar
-                total_chunks_count = await chunk_model.get_total_chunks_count(project_id=project.project_id)
-            
                 pbar = tqdm(total=total_chunks_count, desc="Vector Indexing", position=0)
             
                 while has_recordes:
@@ -115,7 +154,7 @@ async def _index_data_content(task_instance, project_id: int ,do_reset: int):
                     )
             
                     if not is_inserted:
-                        task_instance.update_stste(
+                        task_instance.update_state(
                                 state = 'FAILURE',
                                 meta={
                                         "signal": ResponseSignal.INSERT_INTO_VECTORDB_ERROR.value
@@ -140,15 +179,26 @@ async def _index_data_content(task_instance, project_id: int ,do_reset: int):
                             )
                 logger.warning(f"Task completed successfully for project {project_id} with inserted items count = {inserted_items_count}.")
 
-                
-                return {
+                task_result = {
                         "signal": ResponseSignal.INSERT_INTO_VECTORDB_SUCCESS.value,
                         "inserted_items_count": inserted_items_count
                         }
+
+                await idempotency_manager.update_task_status(
+                    execution_id=task_record.execution_id,
+                    status='SUCCESS',
+                    result=task_result
+                )
+
+                return task_result
     
 
     except Exception as e:
             logger.error(f"Task failed with error: {str(e)}")
+            if task_record:
+                await idempotency_manager.update_task_status(
+                    execution_id=task_record.execution_id, status='FAILURE'
+                )
             raise
     
     finally:
